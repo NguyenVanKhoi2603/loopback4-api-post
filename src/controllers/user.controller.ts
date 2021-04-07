@@ -4,6 +4,7 @@ import {
   TokenServiceBindings,
   UserServiceBindings
 } from '@loopback/authentication-jwt';
+//import {authorize} from "@loopback/authorization";
 import {inject} from '@loopback/core';
 import {Count, CountSchema, Filter, FilterExcludingWhere, model, property, repository, Where} from '@loopback/repository';
 import {
@@ -56,6 +57,26 @@ export const CredentialsRequestBody = {
   },
 };
 
+const RESOURCE_NAME = 'user';
+const ACL_PROJECT = {
+
+  'view-all': {
+    resource: `${RESOURCE_NAME}*`,
+    scopes: ['view-all'],
+    allowedRoles: ['ADMIN', 'USER'],
+  },
+  'admin': {
+    resource: `${RESOURCE_NAME}*`,
+    scopes: ['admin'],
+    allowedRoles: ['ADMIN'],
+  },
+  'user': {
+    resource: `${RESOURCE_NAME}*`,
+    scopes: ['user'],
+    allowedRoles: ['USER'],
+  },
+};
+
 export class UserController {
   constructor(
     @inject(TokenServiceBindings.TOKEN_SERVICE)
@@ -79,6 +100,7 @@ export class UserController {
     return this.userRepository.count(where);
   }
 
+
   @get('/users')
   @response(200, {
     description: 'Array of User model instances',
@@ -91,6 +113,8 @@ export class UserController {
       },
     },
   })
+  //@authorize(ACL_PROJECT['admin'])
+  //@authorize({allowedRoles: ['ADMIN']})
   async find(
     @param.filter(User) filter?: Filter<User>,
   ): Promise<User[]> {
@@ -203,6 +227,8 @@ export class UserController {
       },
     },
   })
+  //@authorize(ACL_PROJECT['admin'])
+  //@authorize({allowedRoles: ['ADMIN']})
   async login(
     @requestBody(CredentialsRequestBody) credentials: Credentials,
   ): Promise<{token: string}> {
