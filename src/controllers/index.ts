@@ -5,3 +5,8 @@ export * from './user-post.controller';
 export * from './post-user.controller';
 export * from './user.controller';
 export * from './post.controller';
+export * from './user-comment.controller';
+export * from './comment-user.controller';
+export * from './post-comment.controller';
+export * from './comment-post.controller';
+export * from './comment.controller';

@@ -1,9 +1,10 @@
 import {Getter, inject} from '@loopback/core';
 import {DefaultCrudRepository, HasManyRepositoryFactory, HasOneRepositoryFactory, repository} from '@loopback/repository';
 import {DbDataSource} from '../datasources';
-import {Post, User, UserCredential, UserRelations} from '../models';
+import {Post, User, UserCredential, UserRelations, Comment} from '../models';
 import {PostRepository} from './post.repository';
 import {UserCredentialRepository} from './user-credential.repository';
+import {CommentRepository} from './comment.repository';
 
 export class UserRepository extends DefaultCrudRepository<
   User,
@@ -15,10 +16,14 @@ export class UserRepository extends DefaultCrudRepository<
 
   public readonly posts: HasManyRepositoryFactory<Post, typeof User.prototype.id>;
 
+  public readonly comments: HasManyRepositoryFactory<Comment, typeof User.prototype.id>;
+
   constructor(
-    @inject('datasources.db') dataSource: DbDataSource, @repository.getter('UserCredentialRepository') protected userCredentialRepositoryGetter: Getter<UserCredentialRepository>, @repository.getter('PostRepository') protected postRepositoryGetter: Getter<PostRepository>,
+    @inject('datasources.db') dataSource: DbDataSource, @repository.getter('UserCredentialRepository') protected userCredentialRepositoryGetter: Getter<UserCredentialRepository>, @repository.getter('PostRepository') protected postRepositoryGetter: Getter<PostRepository>, @repository.getter('CommentRepository') protected commentRepositoryGetter: Getter<CommentRepository>,
   ) {
     super(User, dataSource);
+    this.comments = this.createHasManyRepositoryFactoryFor('comments', commentRepositoryGetter,);
+    this.registerInclusionResolver('comments', this.comments.inclusionResolver);
     this.posts = this.createHasManyRepositoryFactoryFor('posts', postRepositoryGetter,);
     this.registerInclusionResolver('posts', this.posts.inclusionResolver);
     this.userCredential = this.createHasOneRepositoryFactoryFor('userCredential', userCredentialRepositoryGetter);

@@ -1,4 +1,6 @@
-import {Entity, model, property} from '@loopback/repository';
+import {Entity, model, property, belongsTo} from '@loopback/repository';
+import {User} from './user.model';
+import {Post} from './post.model';
 
 @model()
 export class Comment extends Entity {
@@ -19,6 +21,11 @@ export class Comment extends Entity {
   })
   timestamp?: string;
 
+  @belongsTo(() => User)
+  userId: number;
+
+  @belongsTo(() => Post)
+  postId: number;
 
   constructor(data?: Partial<Comment>) {
     super(data);
