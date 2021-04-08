@@ -1,4 +1,6 @@
 //import {authorize} from "@loopback/authorization";
+import {authenticate} from '@loopback/authentication';
+import {authorize} from '@loopback/authorization';
 import {
   Count,
   CountSchema,
@@ -29,12 +31,12 @@ const ACL_PROJECT = {
   },
   'admin': {
     resource: `${RESOURCE_NAME}*`,
-    scopes: ['admin'],
+    scopes: ['ADMIN'],
     allowedRoles: ['ADMIN'],
   },
   'user': {
     resource: `${RESOURCE_NAME}*`,
-    scopes: ['user'],
+    scopes: ['USER'],
     allowedRoles: ['USER'],
   },
 };
@@ -51,7 +53,8 @@ export class PostController {
     description: 'Post model instance',
     content: {'application/json': {schema: getModelSchemaRef(Post)}},
   })
-  //@authorize(ACL_PROJECT['view-all'])
+  @authenticate('jwt')
+  @authorize(ACL_PROJECT['user'])
   async create(
     @requestBody({
       content: {

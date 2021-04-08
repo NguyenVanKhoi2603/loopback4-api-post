@@ -232,8 +232,6 @@ export class UserController {
   async login(
     @requestBody(CredentialsRequestBody) credentials: Credentials,
   ): Promise<{token: string}> {
-    console.log("=============> login !!!");
-
     const user = await this.userService.verifyCredentials(credentials);
     const userProfile = this.userService.convertToUserProfile(user);
     const token = await this.jwtService.generateToken(userProfile);
