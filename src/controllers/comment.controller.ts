@@ -41,6 +41,8 @@ export class CommentController {
     })
     comment: Omit<Comment, 'id'>,
   ): Promise<Comment> {
+    console.log("=======> create comment!!!!");
+
     return this.commentRepository.create(comment);
   }
 
