@@ -1,8 +1,7 @@
-import {authenticate, TokenService} from '@loopback/authentication';
+import {authenticate} from '@loopback/authentication';
 import {
-  Credentials, MyUserService,
-  TokenServiceBindings,
-  UserServiceBindings
+
+  TokenServiceBindings
 } from '@loopback/authentication-jwt';
 //import {authorize} from "@loopback/authorization";
 import {inject} from '@loopback/core';
@@ -22,9 +21,12 @@ import {
 import {SecurityBindings, securityId, UserProfile} from '@loopback/security';
 import {genSalt, hash} from 'bcryptjs';
 import _ from 'lodash';
+import {JWTService} from "../jwt.service";
+import {UserServiceBindings} from "../keys";
 import {User} from '../models/user.model';
 import {UserCredentialRepository} from "../repositories/user-credential.repository";
 import {UserRepository} from "../repositories/user.repository";
+import {Credentials, NPUserService} from "../user.service";
 
 @model()
 export class NewUserRequest extends User {
@@ -57,32 +59,12 @@ export const CredentialsRequestBody = {
   },
 };
 
-const RESOURCE_NAME = 'user';
-const ACL_PROJECT = {
-
-  'view-all': {
-    resource: `${RESOURCE_NAME}*`,
-    scopes: ['view-all'],
-    allowedRoles: ['ADMIN', 'USER'],
-  },
-  'admin': {
-    resource: `${RESOURCE_NAME}*`,
-    scopes: ['admin'],
-    allowedRoles: ['ADMIN'],
-  },
-  'user': {
-    resource: `${RESOURCE_NAME}*`,
-    scopes: ['user'],
-    allowedRoles: ['USER'],
-  },
-};
-
 export class UserController {
   constructor(
     @inject(TokenServiceBindings.TOKEN_SERVICE)
-    public jwtService: TokenService,
+    public jwtService: JWTService,
     @inject(UserServiceBindings.USER_SERVICE)
-    public userService: MyUserService,
+    public userService: NPUserService,
     @inject(SecurityBindings.USER, {optional: true})
     public user: UserProfile,
     @repository(UserRepository) protected userRepository: UserRepository,
@@ -227,15 +209,15 @@ export class UserController {
       },
     },
   })
-  //@authorize(ACL_PROJECT['admin'])
-  //@authorize({allowedRoles: ['ADMIN']})
+
   async login(
     @requestBody(CredentialsRequestBody) credentials: Credentials,
-  ): Promise<{token: string}> {
+  ): Promise<{token: string, info: any}> {
     const user = await this.userService.verifyCredentials(credentials);
     const userProfile = this.userService.convertToUserProfile(user);
     const token = await this.jwtService.generateToken(userProfile);
-    return {token};
+    const info = userProfile;
+    return {token, info};
   }
 
   @authenticate('jwt')

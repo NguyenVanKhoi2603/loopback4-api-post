@@ -18,43 +18,27 @@ import {
   requestBody,
   response
 } from '@loopback/rest';
+import {basicAuthorization} from '../basic.authorizor';
 import {Post} from '../models';
 import {PostRepository} from '../repositories';
 
-const RESOURCE_NAME = 'post';
-const ACL_PROJECT = {
-
-  'view-all': {
-    resource: `${RESOURCE_NAME}*`,
-    scopes: ['view-all'],
-    allowedRoles: ['ADMIN', 'USER'],
-  },
-  'admin': {
-    resource: `${RESOURCE_NAME}*`,
-    scopes: ['ADMIN'],
-    allowedRoles: ['ADMIN'],
-  },
-  'user': {
-    resource: `${RESOURCE_NAME}*`,
-    scopes: ['USER'],
-    allowedRoles: ['USER'],
-  },
-};
-
+//@authenticate('jwt')
+@authenticate('jwt')
+//@authorize({allowedRoles: ['USER', 'ADMIN'], voters: [basicAuthorization]})
 export class PostController {
   constructor(
     @repository(PostRepository)
     public postRepository: PostRepository,
   ) { }
 
-
   @post('/posts')
   @response(200, {
     description: 'Post model instance',
     content: {'application/json': {schema: getModelSchemaRef(Post)}},
   })
-  @authenticate('jwt')
-  @authorize(ACL_PROJECT['user'])
+
+
+  @authorize({allowedRoles: ['ADMIN', 'USER'], voters: [basicAuthorization]})
   async create(
     @requestBody({
       content: {

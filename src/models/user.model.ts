@@ -11,12 +11,12 @@ export class User extends Entity {
     generated: true,
     required: false,
   })
-  id?: number;
+  id: number;
 
   @property({
     type: 'string',
   })
-  username?: string;
+  username: string;
 
   @property({
     type: 'string',
@@ -33,7 +33,7 @@ export class User extends Entity {
     type: 'string',
     default: 'USER'
   })
-  role?: string;
+  role: string;
 
   @hasOne(() => UserCredential)
   userCredential: UserCredential;

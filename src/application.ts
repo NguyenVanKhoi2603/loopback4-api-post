@@ -1,5 +1,6 @@
 import {AuthenticationComponent} from '@loopback/authentication';
-import {JWTAuthenticationComponent, UserServiceBindings} from '@loopback/authentication-jwt';
+import {JWTAuthenticationComponent, TokenServiceBindings} from '@loopback/authentication-jwt';
+import {AuthorizationComponent} from '@loopback/authorization';
 import {BootMixin} from '@loopback/boot';
 import {ApplicationConfig} from '@loopback/core';
 import {RepositoryMixin} from '@loopback/repository';
@@ -11,8 +12,10 @@ import {
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
 import {DbDataSource} from './datasources';
+import {JWTService} from "./jwt.service";
+import {UserServiceBindings} from "./keys";
 import {MySequence} from './sequence';
-
+import {NPUserService} from "./user.service";
 export {ApplicationConfig};
 
 export class ApiPostApplication extends BootMixin(
@@ -20,13 +23,10 @@ export class ApiPostApplication extends BootMixin(
 ) {
   constructor(options: ApplicationConfig = {}) {
     super(options);
-
     // Set up the custom sequence
     this.sequence(MySequence);
-
     // Set up default home page
     this.static('/', path.join(__dirname, '../public'));
-
     // Customize @loopback/rest-explorer configuration here
     this.configure(RestExplorerBindings.COMPONENT).to({
       path: '/explorer',
@@ -43,11 +43,17 @@ export class ApiPostApplication extends BootMixin(
         nested: true,
       },
     };
-    //this.component(AuthorizationComponent);
-    this.component(AuthenticationComponent);
-    // Mount jwt component
-    this.component(JWTAuthenticationComponent);
-    // Bind datasource
-    this.dataSource(DbDataSource, UserServiceBindings.DATASOURCE_NAME);
+
+    this.component(AuthenticationComponent)
+    // Binding authorization component
+    this.component(AuthorizationComponent)
+    // Binding JWT Component
+    this.component(JWTAuthenticationComponent)
+    // Bind JWT service
+    this.bind(TokenServiceBindings.TOKEN_SERVICE).toClass(JWTService)
+    // Binding datasource
+    this.dataSource(DbDataSource, UserServiceBindings.DATASOURCE_NAME)
+    //Binding User Service
+    this.bind(UserServiceBindings.USER_SERVICE).toClass(NPUserService)
   }
 }
