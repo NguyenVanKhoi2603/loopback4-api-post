@@ -3,6 +3,7 @@ import {
 
   TokenServiceBindings
 } from '@loopback/authentication-jwt';
+import {authorize} from '@loopback/authorization';
 //import {authorize} from "@loopback/authorization";
 import {inject} from '@loopback/core';
 import {Count, CountSchema, Filter, FilterExcludingWhere, model, property, repository, Where} from '@loopback/repository';
@@ -21,6 +22,7 @@ import {
 import {SecurityBindings, securityId, UserProfile} from '@loopback/security';
 import {genSalt, hash} from 'bcryptjs';
 import _ from 'lodash';
+import {basicAuthorization} from '../basic.authorizor';
 import {JWTService} from "../jwt.service";
 import {UserServiceBindings} from "../keys";
 import {User} from '../models/user.model';
@@ -186,6 +188,8 @@ export class UserController {
   @response(204, {
     description: 'User DELETE success',
   })
+  @authenticate('jwt')
+  @authorize({allowedRoles: ['ADMIN'], voters: [basicAuthorization]})
   async deleteById(@param.path.number('id') id: number): Promise<void> {
     await this.userRepository.deleteById(id);
   }
@@ -220,7 +224,6 @@ export class UserController {
     return {token, info};
   }
 
-  @authenticate('jwt')
   @get('/whoAmI', {
     responses: {
       '200': {
