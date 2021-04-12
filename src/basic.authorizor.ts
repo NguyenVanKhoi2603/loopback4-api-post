@@ -22,7 +22,6 @@ export async function basicAuthorization(
       'role',
     ])
     currentUser = {[securityId]: user.id, name: user.username, role: user.role}
-    console.log(currentUser.role + "currentUser");
 
   } else {
     return AuthorizationDecision.DENY

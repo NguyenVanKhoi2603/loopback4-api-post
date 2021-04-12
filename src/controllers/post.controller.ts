@@ -1,6 +1,7 @@
 //import {authorize} from "@loopback/authorization";
 import {authenticate} from '@loopback/authentication';
 import {authorize} from '@loopback/authorization';
+import {inject} from '@loopback/context';
 import {
   Count,
   CountSchema,
@@ -18,10 +19,10 @@ import {
   requestBody,
   response
 } from '@loopback/rest';
+import {SecurityBindings, securityId, UserProfile} from "@loopback/security";
 import {basicAuthorization} from '../basic.authorizor';
 import {Post} from '../models';
 import {PostRepository} from '../repositories';
-
 //@authenticate('jwt')
 @authenticate('jwt')
 //@authorize({allowedRoles: ['USER', 'ADMIN'], voters: [basicAuthorization]})
@@ -29,6 +30,8 @@ export class PostController {
   constructor(
     @repository(PostRepository)
     public postRepository: PostRepository,
+    @inject(SecurityBindings.USER, {optional: true})
+    public user: UserProfile,
   ) { }
 
   @post('/posts')
@@ -36,7 +39,6 @@ export class PostController {
     description: 'Post model instance',
     content: {'application/json': {schema: getModelSchemaRef(Post)}},
   })
-
 
   @authorize({allowedRoles: ['ADMIN', 'USER'], voters: [basicAuthorization]})
   async create(
@@ -134,7 +136,11 @@ export class PostController {
     })
     post: Post,
   ): Promise<void> {
-    await this.postRepository.updateById(id, post);
+    if (this.user[securityId] == post.userId + "") {
+      await this.postRepository.updateById(id, post);
+    } else {
+      return;
+    }
   }
 
   @put('/posts/{id}')

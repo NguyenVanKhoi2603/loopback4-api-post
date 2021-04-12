@@ -84,7 +84,6 @@ export class UserController {
     return this.userRepository.count(where);
   }
 
-
   @get('/users')
   @response(200, {
     description: 'Array of User model instances',
@@ -97,8 +96,6 @@ export class UserController {
       },
     },
   })
-  //@authorize(ACL_PROJECT['admin'])
-  //@authorize({allowedRoles: ['ADMIN']})
   async find(
     @param.filter(User) filter?: Filter<User>,
   ): Promise<User[]> {
@@ -125,6 +122,8 @@ export class UserController {
     description: 'User PATCH success count',
     content: {'application/json': {schema: CountSchema}},
   })
+  @authenticate('jwt')
+  @authorize({allowedRoles: ['MANAGER'], voters: [basicAuthorization]})
   async updateAll(
     @requestBody({
       content: {
@@ -148,6 +147,8 @@ export class UserController {
       },
     },
   })
+  @authenticate('jwt')
+  @authorize({allowedRoles: ['MANAGER'], voters: [basicAuthorization]})
   async findById(
     @param.path.number('id') id: number,
     @param.filter(User, {exclude: 'where'}) filter?: FilterExcludingWhere<User>
@@ -159,6 +160,8 @@ export class UserController {
   @response(204, {
     description: 'User PATCH success',
   })
+  @authenticate('jwt')
+  @authorize({allowedRoles: ['MANAGER'], voters: [basicAuthorization]})
   async updateById(
     @param.path.number('id') id: number,
     @requestBody({
@@ -177,6 +180,8 @@ export class UserController {
   @response(204, {
     description: 'User PUT success',
   })
+  @authenticate('jwt')
+  @authorize({allowedRoles: ['MANAGER'], voters: [basicAuthorization]})
   async replaceById(
     @param.path.number('id') id: number,
     @requestBody() user: User,
@@ -189,7 +194,7 @@ export class UserController {
     description: 'User DELETE success',
   })
   @authenticate('jwt')
-  @authorize({allowedRoles: ['ADMIN'], voters: [basicAuthorization]})
+  @authorize({allowedRoles: ['MANAGER'], voters: [basicAuthorization]})
   async deleteById(@param.path.number('id') id: number): Promise<void> {
     await this.userRepository.deleteById(id);
   }
@@ -238,13 +243,14 @@ export class UserController {
       },
     },
   })
+  @authenticate('jwt')
   async whoAmI(
-    @inject(SecurityBindings.USER)
-    currentUserProfile: UserProfile,
+    //@inject(SecurityBindings.USER) user: UserProfile
   ): Promise<string> {
-    return currentUserProfile[securityId];
+    //console.log(user[securityId]);
+    console.log(this.user[securityId]);
+    return "user[securityId]";
   }
-
   @post('/signup', {
     responses: {
       '200': {
