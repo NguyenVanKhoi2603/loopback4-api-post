@@ -41,8 +41,6 @@ export async function basicAuthorization(
     roleIsAllowed = true
   }
 
-  console.log(roleIsAllowed);
-
   if (!roleIsAllowed) {
     return AuthorizationDecision.DENY
   } else {

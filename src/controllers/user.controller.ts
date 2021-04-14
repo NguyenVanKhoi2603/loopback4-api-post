@@ -245,11 +245,8 @@ export class UserController {
   })
   @authenticate('jwt')
   async whoAmI(
-    //@inject(SecurityBindings.USER) user: UserProfile
   ): Promise<string> {
-    //console.log(user[securityId]);
-    console.log(this.user[securityId]);
-    return "user[securityId]";
+    return this.user[securityId];
   }
   @post('/signup', {
     responses: {

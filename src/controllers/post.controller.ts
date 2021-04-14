@@ -40,7 +40,7 @@ export class PostController {
     content: {'application/json': {schema: getModelSchemaRef(Post)}},
   })
 
-  @authorize({allowedRoles: ['ADMIN', 'USER'], voters: [basicAuthorization]})
+  @authorize({allowedRoles: ['ADMIN', 'USER', 'MANAGER'], voters: [basicAuthorization]})
   async create(
     @requestBody({
       content: {
