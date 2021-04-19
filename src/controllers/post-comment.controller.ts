@@ -3,7 +3,7 @@ import {
   CountSchema,
   Filter,
   repository,
-  Where,
+  Where
 } from '@loopback/repository';
 import {
   del,
@@ -13,11 +13,10 @@ import {
   param,
   patch,
   post,
-  requestBody,
+  requestBody
 } from '@loopback/rest';
 import {
-  Post,
-  Comment,
+  Comment, Post
 } from '../models';
 import {PostRepository} from '../repositories';
 
@@ -42,7 +41,13 @@ export class PostCommentController {
     @param.path.number('id') id: number,
     @param.query.object('filter') filter?: Filter<Comment>,
   ): Promise<Comment[]> {
-    return this.postRepository.comments(id).find(filter);
+    return this.postRepository.comments(id).find(filter,
+      {
+        include: [
+          {relation: 'user'}
+        ]
+      }
+    );
   }
 
   @post('/posts/{id}/comments', {

@@ -83,7 +83,13 @@ export class PostController {
   async find(
     @param.filter(Post) filter?: Filter<Post>,
   ): Promise<Post[]> {
-    return this.postRepository.find(filter);
+    return this.postRepository.find(filter,
+      {
+        include: [
+          {relation: 'user'}
+        ]
+      }
+    );
   }
 
   @patch('/posts')

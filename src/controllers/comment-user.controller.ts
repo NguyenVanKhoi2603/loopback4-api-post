@@ -1,14 +1,14 @@
 import {
-  repository,
+  Filter,
+  repository
 } from '@loopback/repository';
 import {
-  param,
   get,
-  getModelSchemaRef,
+  getModelSchemaRef, param, response
 } from '@loopback/rest';
 import {
   Comment,
-  User,
+  User
 } from '../models';
 import {CommentRepository} from '../repositories';
 
@@ -35,4 +35,32 @@ export class CommentUserController {
   ): Promise<User> {
     return this.commentRepository.user(id);
   }
+
+
+
+  @get('/comments/users')
+  @response(200, {
+    description: 'Array of Comment model instances',
+    content: {
+      'application/json': {
+        schema: {
+          type: 'array',
+          items: getModelSchemaRef(Comment, {includeRelations: true}),
+        },
+      },
+    },
+  })
+  async find(
+    @param.filter(Comment) filter?: Filter<Comment>,
+  ): Promise<Comment[]> {
+    // const myFilter = {
+    //   include: [{'users'}]
+    // };
+    return this.commentRepository.find(
+      {
+        include: [{relation: 'user'}]
+      }
+    );
+  }
+
 }
